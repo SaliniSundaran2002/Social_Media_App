@@ -15,6 +15,8 @@ app.use(
 )
 app.use(json());
 app.use(cookieParser());
+app.use('/uploads', express.static('uploads'));
+
 
 const mongo_uri = process.env.MONGODB_URI
 mongoose.connect(mongo_uri);

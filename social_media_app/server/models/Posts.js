@@ -6,7 +6,8 @@ const postsSchema = new mongoose.Schema({
     description:{type:String},
     postedDate:{type:Date, default:Date.now},
     likes:{type:String, required:false},
-    comments:{type:String, required:false}
+    comments:{type:String, required:false},
+    userId:{type:mongoose.Schema.Types.ObjectId, ref:'user'}
 })
 
 const Posts = mongoose.model("PostDetails",postsSchema);
