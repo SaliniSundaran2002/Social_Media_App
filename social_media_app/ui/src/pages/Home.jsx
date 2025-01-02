@@ -178,10 +178,7 @@ const Home = () => {
               <div className="flex items-center p-4 border-b">
                 <div className="bg-blue-500 h-10 w-10 rounded-full"></div>
                 <div className="ml-4">
-                  <h3 className="text-sm font-bold">{username}</h3>
-                  {/* <p className="text-xs text-gray-500">
-                    {new Date(post.postedDate).toLocaleString()}
-                  </p> */}
+                  <h3 className="text-sm font-bold">{post.userId.username}</h3>
                 </div>
               </div>
 

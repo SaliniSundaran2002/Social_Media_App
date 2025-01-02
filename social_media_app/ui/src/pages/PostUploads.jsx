@@ -38,7 +38,7 @@ const PostUploads = () => {
       if (response.status === 200) {
         console.log("Response data:", data);
         toast.success('Post created successfully!');
-        navigate('/home');
+        navigate('/profilePage');
       } else {
         toast.error(data.message || 'Failed to create post');
       }
@@ -73,8 +73,8 @@ const PostUploads = () => {
             <label htmlFor="imageOrVideo">Image/Video:</label>
             <input
               type="file"
-              id="imageOrVideo"
-              name="files"
+              id="profilePic"
+              name="profilePic"
               onChange={handleChange}
               className="w-full border border-blue-500 p-4 rounded-lg"
               accept="image/*,video/*"  // Restrict file types

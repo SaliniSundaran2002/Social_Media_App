@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const ProfilePage = () => {
   const [user, setUser] = useState(null); // Store user details
@@ -10,12 +11,9 @@ const ProfilePage = () => {
     const fetchUserData = async () => {
       try {
         const userResponse = await fetch('/api/getUserdetails'); 
-        const postsResponse = await fetch('/api/uploadPost');
-        console.log("postsResponse:", postsResponse);
-        console.log("user:", userResponse);
+        const postsResponse = await fetch('/api/getPostdetails');
         
-
-        if (userResponse.ok || postsResponse.ok) {
+        if (userResponse.ok && postsResponse.ok) {
           const userData = await userResponse.json();
           const userPosts = await postsResponse.json();
 
@@ -23,9 +21,11 @@ const ProfilePage = () => {
           setPosts(userPosts);
         } else {
           console.error('Error fetching data');
+          toast.error('Error fetching user or posts data');
         }
       } catch (error) {
         console.error('Fetch error:', error);
+        toast.error('Failed to fetch data');
       } finally {
         setLoading(false);
       }
@@ -39,12 +39,15 @@ const ProfilePage = () => {
       const response = await fetch(`/api/deletePost/${postId}`, { method: 'DELETE' });
 
       if (response.ok) {
-        setPosts(posts.filter((post) => post._id !== postId)); // Remove the deleted post from the UI
+        setPosts(posts.filter((post) => post._id !== postId));
+        toast.success('Post deleted successfully');
       } else {
         console.error('Error deleting post:', response.statusText);
+        toast.error('Failed to delete the post');
       }
     } catch (error) {
       console.error('Delete error:', error);
+      toast.error('An error occurred while deleting the post');
     }
   };
 
@@ -55,10 +58,10 @@ const ProfilePage = () => {
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Left Sidebar */}
-      <div className="w-1/4 bg-white shadow-md p-6">
-        {user?.profilePic ? (
+      <div className="flex flex-col  bg-white shadow-md p-6">
+        {user?.userDetails.profilePic ? (
           <img 
-            src={`/api/${user.profilePic}`} 
+            src={`/api/${user.userDetails.profilePic}`}
             alt="Profile" 
             className="h-32 w-32 rounded-full mx-auto"
           />
@@ -66,6 +69,8 @@ const ProfilePage = () => {
           <div className="h-32 w-32 bg-gray-300 rounded-full mx-auto"></div>
         )}
         <h1 className="text-center font-bold text-lg mt-4">{user?.username}</h1>
+        <h4 className="text-center font-bold mt-4">{user.userDetails.bio}</h4>
+        <h4 className="text-center font-bold mt-4">{user.userDetails.gender}</h4>
         <Link
           to="/editProfile"
           className="block bg-blue-500 text-white text-center rounded-lg mt-4 py-2"

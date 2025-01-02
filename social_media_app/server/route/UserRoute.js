@@ -69,7 +69,7 @@ userRoute.post('/login', async (req, res) => {
         if (!passwordMatch) {
             return res.status(401).json({ message: "Invalid Password!" })
         }
-        const token = jwt.sign({ id: existUser._id, username: existUser.username }, process.env.SECRET_KEY, { expiresIn: "1h" });
+        const token = jwt.sign({ id: existUser._id, username: existUser.username }, process.env.SECRET_KEY, { expiresIn: "10h" });
         res.cookie("UserToken", token, { httpOnly: true, secure: false });
         return res.status(200).json({ token, message: "Login successfull!" })
 
@@ -80,14 +80,14 @@ userRoute.post('/login', async (req, res) => {
     }
 })
 
-userRoute.post('/profile', authenticate, upload.single('profilePic'), async (req, res) => {
+userRoute.put('/profile', authenticate, upload.single('profilePic'), async (req, res) => {
     try {
         console.log(req.user);
-        const { profilePic } = req.file;
+        const profilePic = req.file ? req.file.path : req.body.profilePic;
         const { bio, phonenumber, gender, birthday } = req.body;
         const userId = req.user.id;
         const updatedUser = await user.findByIdAndUpdate(userId,
-            { bio, phonenumber, gender, birthday, profilePic },
+            { profilePic,bio, phonenumber, gender, birthday },
             { new: true }
         );
         if (!updatedUser) {
@@ -128,9 +128,11 @@ userRoute.get('/getUsername', authenticate, async (req, res) => {
 userRoute.get('/getPostdetails', authenticate, async (req, res) => {
     try {
         // Fetch posts associated with the logged-in user's ID
-        const postDetails = await Posts.find({ _id: req.user.id });
+        const postDetails = await Posts.find({ userId: req.user.id });
 
-        console.log(req.user.id);
+        // console.log(req.user.id);
+        // console.log(postDetails);
+        
 
 
         if (!postDetails || postDetails.length === 0) {
@@ -166,7 +168,7 @@ userRoute.post('/uploadPost', authenticate, upload.fields([{ name: 'files' }, { 
     // console.log('Files received:', req.files);
     const { files, music } = req.files;
     const { description } = req.body;
-    const username= req.user.username;
+    const username= req.user.id;
     if (!files) {
         return res.status(400).json({ message: 'Files is missing' });
     }
@@ -175,7 +177,7 @@ userRoute.post('/uploadPost', authenticate, upload.fields([{ name: 'files' }, { 
         files: files ? files[0].path : null,
         music: music ? music[0].path : null,
         description,
-        userName:username
+        userId:username
     })
     await newPost.save()
 
@@ -190,10 +192,9 @@ userRoute.post('/uploadPost', authenticate, upload.fields([{ name: 'files' }, { 
     });
 })
 
-userRoute.get('/viewallposts', async (req, res) => {
+userRoute.get('/viewallposts',authenticate, async (req, res) => {
     try {
-        const posts = await Posts.find();
-        const getId = await user.find();
+        const posts = await Posts.find().populate('userId', 'username'); 
         if (posts.length > 0) {
             return res.status(200).json({ message: posts });
         }
